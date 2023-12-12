@@ -131,7 +131,7 @@ namespace livelybot_gazebo_motor_control
     {
         double currentPos, currentVel, calcTorque;
         lastCmd = *(command.readFromRT());
-
+        printf("0x%02X",lastCmd.mode);  
         // set command data
         if(lastCmd.mode == PMSM) {
             servoCmd.pos = lastCmd.q;

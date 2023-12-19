@@ -24,6 +24,7 @@ namespace livelybot_gazebo_motor_control
 
     void LivelyBotGazeboMotorController::setCommandCB(const livelybot_msg::MotorCmdConstPtr& msg)
     {
+        std::cout<<name_space<<" "<<msg->tau<<"\n";
         lastCmd.mode = msg->mode;
         lastCmd.q = msg->q;
         lastCmd.Kp = msg->Kp;
@@ -54,7 +55,7 @@ namespace livelybot_gazebo_motor_control
         }
         else
         {
-            // std::cout<<"=--=-=-=-=-=-=-"<<std::endl;
+            std::cout<<"=--=-=-=-=-=-=-"<<std::endl;
             ROS_INFO_NAMED(name,n.getNamespace().c_str());
             ROS_INFO_STREAM_NAMED(name,n.getNamespace().c_str());
         }
@@ -78,6 +79,8 @@ namespace livelybot_gazebo_motor_control
             ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
             return false;
         }
+        // ROS_INFO("0'%s'", joint_name.c_str());
+
         if (joint_name == "FR_hip_joint" || joint_name == "FL_hip_joint" || joint_name == "RR_hip_joint" || joint_name == "RL_hip_joint")
         {
             isHip = true;
@@ -89,13 +92,16 @@ namespace livelybot_gazebo_motor_control
         joint = robot->getHandle(joint_name);
 
         // Start command subscriber
+        // ROS_INFO("1'%s'", joint_name.c_str());
         sub_ft = n.subscribe(name_space + "/" + "joint_wrench", 1, &LivelyBotGazeboMotorController::setTorqueCB, this);
-        sub_cmd = n.subscribe("command", 20, &LivelyBotGazeboMotorController::setCommandCB, this);
+        sub_cmd = n.subscribe(name_space + "/command", 20, &LivelyBotGazeboMotorController::setCommandCB, this);
+        // ROS_INFO("2'%s'", joint_name.c_str());
 
         // pub_state = n.advertise<unitree_legged_msgs::MotorState>(name_space + "/state", 20);
         // Start realtime state publisher
         controller_state_publisher_.reset(
             new realtime_tools::RealtimePublisher<livelybot_msg::MotorState>(n, name_space + "/state", 1));
+        // ROS_INFO("3'%s'", joint_name.c_str());
 
         return true;
     }
@@ -131,11 +137,11 @@ namespace livelybot_gazebo_motor_control
     {
         double currentPos, currentVel, calcTorque;
         lastCmd = *(command.readFromRT());
-        printf("0x%02X",lastCmd.mode);  
+        // printf("0x%02X",lastCmd.mode);  
         // set command data
         if(lastCmd.mode == PMSM) {
             servoCmd.pos = lastCmd.q;
-            std::cout<<"servoCmd.pos:"<<servoCmd.pos<<std::endl;
+            // std::cout<<"servoCmd.pos:"<<servoCmd.pos<<std::endl;
             positionLimits(servoCmd.pos);
             servoCmd.posStiffness = lastCmd.Kp;
             if(fabs(lastCmd.q - PosStopF) < 0.00001){
@@ -171,7 +177,7 @@ namespace livelybot_gazebo_motor_control
         } 
 
         currentPos = joint.getPosition();
-        std::cout<<"currentPos: "<<currentPos/3.1415926*180<<" "<<currentPos<<std::endl;
+        // std::cout<<"currentPos: "<<currentPos/3.1415926*180<<" "<<currentPos<<std::endl;
         currentVel = computeVel(currentPos, (double)lastState.pos, (double)lastState.vel, period.toSec());
         calcTorque = computeTorque(currentPos, currentVel, servoCmd);      
         effortLimits(calcTorque);

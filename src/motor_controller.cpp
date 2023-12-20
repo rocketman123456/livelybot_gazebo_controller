@@ -24,7 +24,10 @@ namespace livelybot_gazebo_motor_control
 
     void LivelyBotGazeboMotorController::setCommandCB(const livelybot_msg::MotorCmdConstPtr& msg)
     {
-        std::cout<<name_space<<" "<<msg->tau<<"\n";
+        // std::cout<<name_space<<" the tau is: "<<msg->tau<<"\n"
+        //                      <<" the pos is: "<<msg->q<<"\n"
+        //                      <<" the vel is: "<<msg->Kd<<"\n"
+        //                      <<" the Kp Kd is:"<<msg->Kp<<" "<<msg->Kd<<"\n";
         lastCmd.mode = msg->mode;
         lastCmd.q = msg->q;
         lastCmd.Kp = msg->Kp;
@@ -55,7 +58,7 @@ namespace livelybot_gazebo_motor_control
         }
         else
         {
-            std::cout<<"=--=-=-=-=-=-=-"<<std::endl;
+            // std::cout<<"=--=-=-=-=-=-=-"<<std::endl;
             ROS_INFO_NAMED(name,n.getNamespace().c_str());
             ROS_INFO_STREAM_NAMED(name,n.getNamespace().c_str());
         }
@@ -179,9 +182,13 @@ namespace livelybot_gazebo_motor_control
         currentPos = joint.getPosition();
         // std::cout<<"currentPos: "<<currentPos/3.1415926*180<<" "<<currentPos<<std::endl;
         currentVel = computeVel(currentPos, (double)lastState.pos, (double)lastState.vel, period.toSec());
+        // std::cout<<"currentPos: "<<currentPos<<"\n"
+        //          <<"currentVel: "<<currentVel<<"\n"
+        //          <<"servoCmd.posStiffness: "<<servoCmd.posStiffness<<"\n";
         calcTorque = computeTorque(currentPos, currentVel, servoCmd);      
+        // std::cout<<"calcTorque1: "<<calcTorque<<"\n";
         effortLimits(calcTorque);
-
+        // std::cout<<"calcTorque2: "<<calcTorque<<"\n";
         joint.setCommand(calcTorque);
 
         lastState.pos = currentPos;

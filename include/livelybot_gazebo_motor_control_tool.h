@@ -7,17 +7,20 @@
 #include "ros/ros.h"
 #include <boost/algorithm/algorithm.hpp>
 
-typedef struct 
+typedef struct
 {
     uint8_t mode;
-    double pos;
-    double posStiffness;
-    double vel;
-    double velStiffness;
-    double torque;
+    double  pos;
+    double  posStiffness;
+    double  vel;
+    double  velStiffness;
+    double  torque;
 } ServoCmd;
-double clamp(double& value, double min, double max);  // eg. clamp(1.5, -1, 1) = 1
-double computeVel(double current_position, double last_position, double last_velocity, double duration);  // get current velocity
-double computeTorque(double current_position, double current_velocity, ServoCmd& cmd);  // get torque
+double clamp(double& value, double min, double max); // eg. clamp(1.5, -1, 1) = 1
+double computeVel(double current_position,
+                  double last_position,
+                  double last_velocity,
+                  double duration);                                                    // get current velocity
+double computeTorque(double current_position, double current_velocity, ServoCmd& cmd); // get torque
 
 #endif
